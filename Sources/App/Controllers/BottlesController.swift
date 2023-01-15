@@ -17,9 +17,11 @@ struct BottlesController : RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let bottles = routes.grouped("bottles")
         
+        //MARK: 모든 레코드 조회 (json 데이터로 반환)
+        //localhost:8080/bottles
         bottles.get(use:index)
         
-        //MARK: 모든 레코드 조회
+        //MARK: 모든 레코드 조회 (json String 으로 반환)
         //localhost:8080/bottles/showall
         bottles.get("showall", use: showAllRecords)
         
@@ -29,12 +31,15 @@ struct BottlesController : RouteCollection {
 
         //MARK: Insert : Post 로 body에 스키마에 맞춘 json 을 담아서 쏘면 됨
         //localhost:8080/bottles/insert
-        bottles.post("insert"){ req in
+        bottles.post("insert"){ req in //라우터에서 insert 하는 방법
             try req.content
                 .decode(Bottleshop.self)
                 .save(on: req.db)
                 .transform(to: Response(status: .created))
         }
+        
+        //localhost:8080/bottles/insert2
+        bottles.post("insert2", use: addRecord) //함수로 insert 하는 방법
         
         //MARK: Update : Patch 로 body에 스키마에 맞춘 json 을 담아서 쏘면 됨 (id값은 where 절에 대응)
         //Router 에서 바로 실행하는 예제
@@ -64,8 +69,8 @@ struct BottlesController : RouteCollection {
         }
     }
     
-    func index(req: Request) async throws -> String {
-        return "Hello Bottles!"
+    func index(req: Request) throws -> EventLoopFuture<[Bottleshop]> {
+        return Bottleshop.query(on: req.db).all()
     }
     
     //MARK: id 혹은 name 으로 데이터 레코드를 검색할 수 있는 예제
@@ -92,6 +97,12 @@ struct BottlesController : RouteCollection {
         encoder.outputFormatting = .prettyPrinted
         let data = try encoder.encode(requetedQueryData)
         return String(data: data, encoding: .utf8) ?? "not found"
+    }
+    
+    //레코드 추가하기
+    func addRecord(req:Request) throws -> EventLoopFuture<HTTPStatus> {
+        let bottleshop = try req.content.decode(Bottleshop.self)
+        return bottleshop.save(on: req.db).transform(to: .ok)
     }
     
     //레코드 업데이트하기

@@ -11,7 +11,7 @@ import Fluent
 import FluentMySQLDriver
 
 //테이블마다 스키마
-final class Bottleshop : Model{
+final class Bottleshop : Model, Content {
     //Defining Bottleshop schema
     static let schema: String = "bottleshop"
 
