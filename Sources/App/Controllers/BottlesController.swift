@@ -37,9 +37,8 @@ struct BottlesController : RouteCollection {
         }
         
         //MARK: Update : Patch 로 body에 스키마에 맞춘 json 을 담아서 쏘면 됨 (id값은 where 절에 대응)
-        //localhost:8080/bottles/update
-        
         //Router 에서 바로 실행하는 예제
+        //localhost:8080/bottles/update
         bottles.put("update") { req in
             let updatedBottleshop = try req.content.decode(Bottleshop.self) //데이터모델
             
@@ -55,6 +54,7 @@ struct BottlesController : RouteCollection {
         }
         
         //함수로 update 실행하는 예제
+        //localhost:8080/bottles/update2
         bottles.put("update2", use: updateRecords)
         
         //MARK: Delete : Url 에 id 값을 담아 쏘면 해당 레코드 삭제
